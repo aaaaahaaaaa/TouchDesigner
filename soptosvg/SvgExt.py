@@ -46,8 +46,8 @@ class SvgExt:
 
   def SwitchProjection(self):
     self.projection = self.ownerComp.par.Projection
-    self.ownerComp.par.Camera.enable = self.projection == 'Camera'
-    self.ownerComp.par.Offsetx.enable = not self.projection == 'Camera'
+    self.ownerComp.par.Camera.enable = self.projection == 'Camera' and not self.projection == 'None'
+    self.ownerComp.par.Offsetx.enable = not self.projection == 'Camera' and not self.projection == 'None'
 
 
   def formatFilepath(self):
@@ -94,6 +94,9 @@ class SvgExt:
     elif self.projection == 'Camera':
       pos = self.projectionMatrix * self.viewMatrix * point.P
       return (pos[0], pos[1])
+
+    else:
+    	return (point.x, point.y)
 
 
   def scalePolysToFit(self, polys):
