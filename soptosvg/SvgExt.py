@@ -17,46 +17,14 @@ class SvgExt:
 
 	def __init__(self, ownerComp):
 		self.ownerComp = ownerComp
-		self.initParameters()
 		self.loadParameters()
 		print('SvgExt initialized')
-
-
-	def initParameters(self):
-		svgPage = self.ownerComp.appendCustomPage('SVG')
-
-		svgPage.appendSOP('Sop', label='SOP', order='0')
-		projectionMenu = svgPage.appendMenu('Projection', label='Projection', order='1')[0]
-		projectionMenu.menuNames = ['Camera', 'Offset']
-		projectionMenu.menuLabels = ['Camera\'s matrix', '2D Offset']
-		svgPage.appendCOMP('Camera', label='Camera', order='2')
-		svgPage.appendXY('Offset', label='Offset', order='3')
-		svgPage.appendToggle('Polylineonly', label='Polyline Only', order='4')
-
-		unitMenu = svgPage.appendMenu('Unit', label='Unit', order='5')[0]
-		unitMenu.startSection = True
-		unitMenu.menuNames = ['mm', 'px']
-		unitMenu.menuLabels = ['mm', 'px']
-		svgPage.appendWH('Canva', label='Canva Size', order='6')
-		margin = svgPage.appendInt('Margin', label='Margin', order='7')[0]
-		margin.normMax = 50
-		svgPage.appendToggle('Scaletofit', label='Scale To Fit & Center', order='8')
-
-		svgPage.appendFolder('Folder', label='Folder', order='9')[0].startSection = True
-		svgPage.appendStr('Filename', label='File Name', order='10')
-		suffixeMenu = svgPage.appendMenu('Suffixe', label='Suffixe', order='11')[0]
-		suffixeMenu.menuNames = ['None', 'Timestamp']
-		suffixeMenu.menuLabels = ['None', 'Timestamp']
-		svgPage.appendPulse('Savesvg', label='Save SVG', order='12')
 
 
 	def loadParameters(self):
 		self.sop = op(self.ownerComp.par.Sop)
 		self.projection = self.ownerComp.par.Projection
 		self.camera = op(self.ownerComp.par.Camera)
-		self.viewMatrix = self.camera.worldTransform
-		self.viewMatrix.invert()
-		self.projectionMatrix = self.camera.projection(1, 1)
 		self.offsetX = self.ownerComp.par.Offsetx
 		self.offsetY = self.ownerComp.par.Offsety
 		self.polylineOnly = self.ownerComp.par.Polylineonly
@@ -68,6 +36,12 @@ class SvgExt:
 		self.folder = self.ownerComp.par.Folder
 		self.filename = self.ownerComp.par.Filename
 		self.suffixe = self.ownerComp.par.Suffixe
+		self.svg = op('svg')
+
+		if self.camera:
+			self.viewMatrix = self.camera.worldTransform
+			self.viewMatrix.invert()
+			self.projectionMatrix = self.camera.projection(1, 1)
 
 
 	def SwitchProjection(self):
@@ -187,3 +161,8 @@ class SvgExt:
 
 		self.drawing.save()
 		print(self.filepath + ' saved')
+
+		self.svg.par.file = self.filepath
+		self.svg.par.reload = 0
+		self.svg.cook()
+		self.svg.par.reload = 1
